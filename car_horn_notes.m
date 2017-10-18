@@ -46,32 +46,31 @@ for ii = 1:length(filt_freq)
     end    
 end
 
-idx_filt_freq = round(N*filt_freq/(fs/2)+1);    % Indices of our filtered frequencies
+% PSD values to compare at the interested frequencies.
+for kk = 1:length(filt_freq)
+   PSDvals(kk) = logPSD(F == filt_freq(kk)); 
+end
+%idx_filt_freq = round(N*filt_freq/(fs/2)+1);    % Indices of our filtered frequencies
 ii=1;   % initialization
 
 while ii < length(filt_freq)    % This block boils it down to the frequencies 
                                 % where the highest PSD values are
-    [val, key] = min(abs(filt_freq(ii) - piano_freq));
+    [tmp, key] = min(abs(filt_freq(ii) - piano_freq));
     
     % if the difference in freq between two consecutive entries is close
     % enough, the one with the smaller PSD db value is removed.
     
     if abs(filt_freq(ii+1)-filt_freq(ii)) < adap_freq_tol(key)
-        [val, idx] = min(logPSD(idx_filt_freq(ii:ii+1)));
+        [val, idx] = min(PSDvals(ii:ii+1));
         idx = idx + ii - 1;
         filt_freq(idx) = 0;
         filt_freq = filt_freq( filt_freq ~= 0);
+        PSDvals(idx) = -120;
+        PSDvals = PSDvals( PSDvals ~= -120 );
     else
         ii=ii+1;    % Increment
     end
 end
-
-for ii = 1:length(filt_freq)
-    
-    
-    
-end
-
 
 for jj = 1:length(filt_freq)   % Loop checks if any of the frequencies are F notes
     
